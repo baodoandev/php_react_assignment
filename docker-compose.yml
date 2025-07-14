@@ -15,7 +15,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./booking-system/database/init:/docker-entrypoint-initdb.d
+      - ./database/init:/docker-entrypoint-initdb.d
     networks:
       - booking_network
 
@@ -39,8 +39,14 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./booking-system:/var/www/html
+      - ./booking-system/app:/var/www/html/app
+      - ./booking-system/resources:/var/www/html/resources
+      - ./booking-system/routes:/var/www/html/routes
+      - ./booking-system/config:/var/www/html/config
+      - ./booking-system/database:/var/www/html/database
       - ./booking-system/storage:/var/www/html/storage
+      - ./booking-system/public:/var/www/html/public
+      - ./booking-system/bootstrap:/var/www/html/bootstrap
     depends_on:
       - mysql
     networks:
