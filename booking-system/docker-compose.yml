@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: booking_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: booking_system
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: laravel_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - booking_network
+
+  # Laravel Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: booking_backend
+    restart: unless-stopped
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: booking_system
+      DB_USERNAME: laravel_user
+      DB_PASSWORD: laravel_password
+      APP_ENV: local
+      APP_DEBUG: true
+      APP_KEY: base64:your-app-key-here
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+      - ./storage:/var/www/html/storage
+    depends_on:
+      - mysql
+    networks:
+      - booking_network
+    command: >
+      sh -c "php artisan migrate --force &&
+             php artisan serve --host=0.0.0.0 --port=8000"
+
+  # phpMyAdmin (Optional - for database management)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: booking_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - booking_network
+
+volumes:
+  mysql_data:
+
+networks:
+  booking_network:
+    driver: bridge
