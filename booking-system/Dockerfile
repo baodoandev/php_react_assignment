@@ -24,17 +24,16 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy composer files first for better caching
-COPY composer.json composer.lock ./
-
-# Install composer dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
 # Copy existing application directory contents
 COPY . /var/www/html
 
-# Copy existing application directory permissions
-COPY --chown=www-data:www-data . /var/www/html
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html \
+    && chmod +x /var/www/html/artisan
+
+# Install composer dependencies
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Change current user to www
 USER www-data
