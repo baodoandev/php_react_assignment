@@ -39,8 +39,14 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/var/www/html
+      - ./app:/var/www/html/app
+      - ./resources:/var/www/html/resources
+      - ./routes:/var/www/html/routes
+      - ./config:/var/www/html/config
+      - ./database:/var/www/html/database
       - ./storage:/var/www/html/storage
+      - ./public:/var/www/html/public
+      - ./bootstrap:/var/www/html/bootstrap
     depends_on:
       - mysql
     networks:

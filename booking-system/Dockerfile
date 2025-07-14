@@ -24,6 +24,12 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Copy composer files first for better caching
+COPY composer.json composer.lock ./
+
+# Install composer dependencies
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+
 # Copy existing application directory contents
 COPY . /var/www/html
 
@@ -35,12 +41,6 @@ USER www-data
 
 # Expose port 8000
 EXPOSE 8000
-
-# Copy composer.json and composer.lock to the container
-COPY composer.json composer.lock ./
-
-# Install composer dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Start Laravel development server
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"] 
